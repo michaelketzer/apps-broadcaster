@@ -30,6 +30,7 @@
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "simple-node-logger": "^18.12.23",
+    "typescript": "^3.7.5",
     "ws": "^7.2.0"
   }
 }
