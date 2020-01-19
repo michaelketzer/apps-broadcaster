@@ -43,7 +43,7 @@ build:
       - lib/
   script:
     - echo "Building"
-    - yarn run build
+    - yarn build
 
 deploy_prod:
   stage: deploy_prod
