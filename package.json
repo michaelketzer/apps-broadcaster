@@ -1,0 +1,36 @@
+{
+  "name": "broadcaster",
+  "version": "1.0.0",
+  "description": "The broadcaster component for the internal message",
+  "main": "lib/server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "node lib/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/griefco-de/broadcaster.git"
+  },
+  "keywords": [
+    "shokztv",
+    "broadcaster",
+    "internal"
+  ],
+  "author": "GriefCode",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/griefco-de/broadcaster#readme",
+  "dependencies": {
+    "@sentry/node": "^5.9.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/ws": "^6.0.4",
+    "dotenv": "^8.2.0",
+    "fs": "0.0.1-security",
+    "https": "^1.0.0",
+    "simple-node-logger": "^18.12.23",
+    "typescript": "^3.7.5",
+    "ws": "^7.2.0"
+  }
+}
