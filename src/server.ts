@@ -52,6 +52,7 @@ function ping(): void {
 
 function noop(): void {}
 function heartbeat(ws: HeartbetWS): void {
+    log.info('Heartbeat successful');
     ws.isAlive = true;
 }
 
