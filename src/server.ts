@@ -55,7 +55,7 @@ wssServer.on('request', (request) => {
       return;
     }
     
-    var connection = request.accept('echo-protocol', request.origin) as Connection;
+    var connection = request.accept('', request.origin) as Connection;
     connection.id = uuid();
     connections[connection.id] = connection;
 
