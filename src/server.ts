@@ -58,3 +58,5 @@ function heartbeat(ws: HeartbetWS): void {
 server.listen(PORT);
 log.info('Server started up');
 log.info('=================');
+
+setTimeout(ping, 30000);
