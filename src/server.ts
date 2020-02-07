@@ -2,62 +2,83 @@ import dotenv from 'dotenv';
 dotenv.config();
 //@ts-ignore
 import Logger from 'simple-node-logger';
-import WebSocket from 'ws';
 import fs from 'fs';
 import https from 'https';
 import * as Sentry from '@sentry/node';
-const log = Logger.createSimpleLogger('server.log');
+import {server, connection} from 'websocket';
+import uuid from "uuid/v4";
 
+type Connection = connection & {id: string};
+
+const log = Logger.createSimpleLogger('server.log');
 const {PORT=8080,CERT_KEY='',CERT_CHAIN='',SENTRY_DSN=null} = process.env;
 
 if(SENTRY_DSN) {
     Sentry.init({ dsn: SENTRY_DSN });
 }
-
-interface HeartbetWS extends WebSocket {
-    isAlive: boolean;
-}
-
-const server = https.createServer({
+ 
+const webServer = https.createServer({
     cert: fs.readFileSync(CERT_CHAIN),
     key: fs.readFileSync(CERT_KEY)
+}, (request, response) => {
+    log.info((new Date()) + ' Received request for ' + request.url);
+    response.writeHead(404);
+    response.end();
 });
 
-const wss = new WebSocket.Server({server});
-
-wss.on('connection', (ws: HeartbetWS): void => {
-    log.info('New connection established.');
-    ws.isAlive = true;
-    ws.on('pong', heartbeat);
-
-    ws.on('message', (data: string): void => {
-        log.info(`Received message: [${data}] broadcasting to all clients.`);
-        wss.clients.forEach(clients => clients.send(data));
-    });
+webServer.listen(PORT, () => {
+    log.info((new Date()) + ' Server is listening on port ' + PORT);
 });
+ 
+const wssServer = new server({
+    httpServer: webServer,
+    // You should not use autoAcceptConnections for production
+    // applications, as it defeats all standard cross-origin protection
+    // facilities built into the protocol and the browser.  You should
+    // *always* verify the connection's origin and decide whether or not
+    // to accept it.
+    autoAcceptConnections: false
+});
+ 
+function originIsAllowed(origin: string) {
+  // put logic here to detect whether the specified origin is allowed.
+  return true;
+}
+ 
+var connections: {[x: string]: Connection} = {};
 
-function ping(): void {
-    (wss.clients as Set<HeartbetWS>).forEach((ws): void => {
-        if (ws.isAlive === false) {
-            log.info('Closing connection as heartbeat failed');
-            return ws.terminate();
+wssServer.on('request', (request) => {
+    if (!originIsAllowed(request.origin)) {
+      // Make sure we only accept requests from an allowed origin
+      request.reject();
+      log.info((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+      return;
+    }
+    
+    var connection = request.accept('echo-protocol', request.origin) as Connection;
+    connection.id = uuid();
+    connections[connection.id] = connection;
+
+    log.info((new Date()) + ' Connection accepted, with id ' + connection.id);
+
+    connection.on('message', (message) => {
+        if (message.type === 'utf8') {
+            log.info('Received Message: ' + message.utf8Data);
+            broadcast(message.utf8Data!);
         }
-
-        ws.isAlive = false;
-        ws.ping(noop);
     });
 
-    setTimeout(ping, 30000);
+    connection.on('close', (reasonCode, description) => {
+        log.info((new Date()) + ' Connection ' + connection.id + ' disconnected | Code ' + reasonCode + ' | Description ' + description);
+        delete connections[connection.id];
+    });
+});
+
+// Broadcast to all open connections
+function broadcast(data: string) {
+    Object.values(connections).forEach((connection) => {
+        if (connection.connected) {
+            connection.send(data);
+        }
+    });
 }
-
-function noop(): void {}
-function heartbeat(ws: HeartbetWS): void {
-    log.info('Heartbeat successful');
-    ws.isAlive = true;
-}
-
-server.listen(PORT);
-log.info('Server started up');
-log.info('=================');
-
-setTimeout(ping, 30000);

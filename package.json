@@ -25,12 +25,15 @@
   "dependencies": {
     "@sentry/node": "^5.9.0",
     "@types/dotenv": "^8.2.0",
+    "@types/uuid": "^3.4.7",
+    "@types/websocket": "^1.0.0",
     "@types/ws": "^6.0.4",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "simple-node-logger": "^18.12.23",
     "typescript": "^3.7.5",
-    "ws": "^7.2.0"
+    "uuid": "^3.4.0",
+    "websocket": "^1.0.31"
   }
 }
