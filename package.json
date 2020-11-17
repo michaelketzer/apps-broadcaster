@@ -34,6 +34,6 @@
     "simple-node-logger": "^18.12.23",
     "typescript": "^3.7.5",
     "uuid": "^3.4.0",
-    "websocket": "^1.0.31"
+    "websocket": "^1.0.32"
   }
 }
